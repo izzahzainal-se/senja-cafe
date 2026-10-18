@@ -6,12 +6,19 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
+declare global {
+  interface Window {
+    __lenis?: Lenis;
+  }
+}
+
 export default function SmoothScroll({ children }: { children: React.ReactNode }) {
   useEffect(() => {
-    // Phone / tablet: guna scroll native (lebih stabil kat iOS & Android)
+    // Phone / tablet: guna scroll native
     if (window.matchMedia("(pointer: coarse)").matches) return;
 
-    const lenis = new Lenis({ duration: 1.2, anchors: true });
+    const lenis = new Lenis({ duration: 1.2 });
+    window.__lenis = lenis;
     lenis.on("scroll", ScrollTrigger.update);
     const tick = (time: number) => lenis.raf(time * 1000);
     gsap.ticker.add(tick);
@@ -20,6 +27,7 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
     return () => {
       gsap.ticker.remove(tick);
       lenis.destroy();
+      window.__lenis = undefined;
     };
   }, []);
 

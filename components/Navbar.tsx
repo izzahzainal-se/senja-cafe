@@ -10,6 +10,14 @@ const LINKS = [
 
 type Mode = "day" | "night" | "solid";
 
+// Scroll ke section: Lenis kat laptop, native kat phone
+function scrollToSection(href: string) {
+  const el = document.querySelector<HTMLElement>(href);
+  if (!el) return;
+  if (window.__lenis) window.__lenis.scrollTo(el, { duration: 1.4 });
+  else el.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
 export default function Navbar() {
   const { scrollY } = useScroll();
   const [mode, setMode] = useState<Mode>("day");
@@ -41,14 +49,15 @@ export default function Navbar() {
     };
   }, [open]);
 
-  // Mobile: tutup menu dulu, lepas scroll dibuka semula baru gerak ke section
   function go(e: React.MouseEvent<HTMLAnchorElement>, href: string) {
     e.preventDefault();
-    setOpen(false);
-    setTimeout(() => {
-      const el = document.querySelector(href);
-      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 400);
+    if (open) {
+      // Tutup menu dulu, tunggu scroll dibuka semula
+      setOpen(false);
+      setTimeout(() => scrollToSection(href), 400);
+    } else {
+      scrollToSection(href);
+    }
   }
 
   const tone = open
@@ -77,12 +86,12 @@ export default function Navbar() {
 
           <div className="hidden items-center gap-8 md:flex">
             {LINKS.map((l) => (
-              <a key={l.href} href={l.href} className="group relative text-sm">
+              <a key={l.href} href={l.href} onClick={(e) => go(e, l.href)} className="group relative text-sm">
                 {l.label}
                 <span className="absolute -bottom-1 left-0 h-px w-0 bg-current transition-all duration-300 group-hover:w-full" />
               </a>
             ))}
-            <a href="#menu" className={`rounded-full px-5 py-2 text-sm transition-colors ${cta}`}>
+            <a href="#menu" onClick={(e) => go(e, "#menu")} className={`rounded-full px-5 py-2 text-sm transition-colors ${cta}`}>
               Order now
             </a>
           </div>

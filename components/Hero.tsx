@@ -17,12 +17,10 @@ export default function Hero() {
 
   useGSAP(
     () => {
-      // Intro masa page load
       gsap.from(".hero-reveal", {
         y: 40, opacity: 0, duration: 1.2, ease: "power3.out", stagger: 0.15,
       });
 
-      // Siang → senja → malam ikut scroll
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: root.current,
@@ -46,38 +44,38 @@ export default function Hero() {
   );
 
   return (
-    <section ref={root} className="relative h-screen overflow-hidden">
-      {/* Sky layers */}
-      <div className="absolute inset-0 bg-linear-to-b from-cream to-sand" />
-      <div className="sky-sunset absolute inset-0 opacity-0 bg-linear-to-b from-glow to-ember" />
-      <div className="sky-night absolute inset-0 opacity-0 bg-linear-to-b from-dusk to-midnight" />
+    // Wrapper ni penting: GSAP pin ubah DOM dalam kotak ni je, React tak keliru
+    <div>
+      <section ref={root} className="relative h-screen overflow-hidden">
+        <div className="absolute inset-0 bg-linear-to-b from-cream to-sand" />
+        <div className="sky-sunset absolute inset-0 opacity-0 bg-linear-to-b from-glow to-ember" />
+        <div className="sky-night absolute inset-0 opacity-0 bg-linear-to-b from-dusk to-midnight" />
 
-      {/* Stars */}
-      {STARS.map(([x, y], i) => (
-        <span
-          key={i}
-          className="star absolute h-1 w-1 rounded-full bg-cream opacity-0"
-          style={{ left: `${x}%`, top: `${y}%` }}
-        />
-      ))}
+        {STARS.map(([x, y], i) => (
+          <span
+            key={i}
+            className="star absolute h-1 w-1 rounded-full bg-cream opacity-0"
+            style={{ left: `${x}%`, top: `${y}%` }}
+          />
+        ))}
 
-      {/* Content */}
-      <div className="hero-ink relative z-10 flex h-full flex-col items-center justify-center px-4 text-center text-rust">
-        <SenjaSun className="hero-reveal mb-6 w-28 md:w-36" />
-        <h1 className="hero-reveal font-serif text-7xl tracking-tight md:text-9xl">
-          Senja<span className="text-ember">.</span>
-        </h1>
-        <p className="hero-reveal mt-6 text-xs uppercase tracking-[0.4em] md:text-sm">
-          Coffee for the golden hour
-        </p>
-        <p className="night-line mt-10 translate-y-4 font-serif text-lg italic opacity-0 md:text-xl">
-          Senja pergi, kopi menanti.
-        </p>
-      </div>
+        <div className="hero-ink relative z-10 flex h-full flex-col items-center justify-center px-4 text-center text-rust">
+          <SenjaSun className="hero-reveal mb-6 w-28 md:w-36" />
+          <h1 className="hero-reveal font-serif text-7xl tracking-tight md:text-9xl">
+            Senja<span className="text-ember">.</span>
+          </h1>
+          <p className="hero-reveal mt-6 text-xs uppercase tracking-[0.4em] md:text-sm">
+            Coffee for the golden hour
+          </p>
+          <p className="night-line mt-10 translate-y-4 font-serif text-lg italic opacity-0 md:text-xl">
+            Senja pergi, kopi menanti.
+          </p>
+        </div>
 
-      <div className="scroll-hint absolute bottom-8 left-1/2 z-10 -translate-x-1/2 text-xs uppercase tracking-[0.3em] text-rust">
-        Scroll
-      </div>
-    </section>
+        <div className="scroll-hint absolute bottom-8 left-1/2 z-10 -translate-x-1/2 text-xs uppercase tracking-[0.3em] text-rust">
+          Scroll
+        </div>
+      </section>
+    </div>
   );
 }
