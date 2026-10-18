@@ -20,9 +20,7 @@ export default function Navbar() {
     if (open) return;
     const vh = window.innerHeight;
     const prev = scrollY.getPrevious() ?? 0;
-    // Scroll bawah → sorok, scroll atas → muncul
     setHidden(y > prev && y > vh * 0.3);
-    // Warna ikut langit hero
     const menuTop = document.getElementById("menu")?.offsetTop ?? vh * 2.5;
     setMode(y < vh * 0.6 ? "day" : y < menuTop + 120 ? "night" : "solid");
   });
@@ -43,6 +41,16 @@ export default function Navbar() {
     };
   }, [open]);
 
+  // Mobile: tutup menu dulu, lepas scroll dibuka semula baru gerak ke section
+  function go(e: React.MouseEvent<HTMLAnchorElement>, href: string) {
+    e.preventDefault();
+    setOpen(false);
+    setTimeout(() => {
+      const el = document.querySelector(href);
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 400);
+  }
+
   const tone = open
     ? "text-cream"
     : mode === "solid"
@@ -62,7 +70,7 @@ export default function Navbar() {
         className={`fixed inset-x-0 top-0 z-[70] transition-colors duration-500 ${tone}`}
       >
         <nav className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 md:py-4">
-          <a href="#top" onClick={() => setOpen(false)} className="flex items-center gap-2">
+          <a href="#top" onClick={(e) => go(e, "#top")} className="flex items-center gap-2">
             <SenjaSun className="w-9" />
             <span className="font-serif text-2xl">Senja.</span>
           </a>
@@ -79,7 +87,6 @@ export default function Navbar() {
             </a>
           </div>
 
-          {/* Hamburger: kawasan sentuh 48px */}
           <button
             type="button"
             onClick={() => setOpen((o) => !o)}
@@ -103,7 +110,6 @@ export default function Navbar() {
       <AnimatePresence>
         {open && (
           <motion.div
-            data-lenis-prevent
             initial={{ clipPath: "circle(0% at 100% 0%)" }}
             animate={{ clipPath: "circle(150% at 100% 0%)" }}
             exit={{ clipPath: "circle(0% at 100% 0%)" }}
@@ -114,7 +120,7 @@ export default function Navbar() {
               <motion.a
                 key={l.label}
                 href={l.href}
-                onClick={() => setOpen(false)}
+                onClick={(e) => go(e, l.href)}
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 + i * 0.08 }}
