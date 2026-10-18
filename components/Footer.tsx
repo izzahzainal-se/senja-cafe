@@ -1,6 +1,6 @@
 "use client";
-import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+import { motion, useScroll, useSpring, useTransform } from "framer-motion";
 import { supabase } from "@/lib/supabase";
 import type { Branch } from "@/lib/types";
 import SenjaSun from "./SenjaSun";
@@ -28,6 +28,16 @@ const mapUrl = (address: string) =>
 
 export default function Footer() {
   const [branches, setBranches] = useState<Branch[]>([]);
+  const sunRef = useRef<HTMLDivElement>(null);
+
+  // Matahari ikut scroll: naik bila scroll bawah, turun bila scroll atas
+  const { scrollYProgress } = useScroll({
+    target: sunRef,
+    offset: ["start end", "end end"],
+  });
+  const rawY = useTransform(scrollYProgress, [0, 1], ["85%", "10%"]);
+  const y = useSpring(rawY as unknown as never, { stiffness: 120, damping: 30, mass: 0.4 });
+  const glow = useTransform(scrollYProgress, [0, 1], [0.4, 0.85]);
 
   useEffect(() => {
     supabase
@@ -148,14 +158,11 @@ export default function Footer() {
         </div>
       </div>
 
-      {/* Wordmark + matahari terbit */}
-      <div className="relative mx-auto max-w-6xl overflow-hidden px-4">
+      {/* Wordmark + matahari terbit (ikut scroll) */}
+      <div ref={sunRef} className="relative mx-auto max-w-6xl overflow-hidden px-4">
         <motion.div
-          initial={{ y: "70%" }}
-          whileInView={{ y: "10%" }}
-          viewport={{ once: true }}
-          transition={{ duration: 1.8, ease: [0.22, 1, 0.36, 1] }}
-          className="pointer-events-none absolute inset-x-0 top-0 mx-auto aspect-square w-[45vw] max-w-sm rounded-full bg-linear-to-b from-glow to-ember opacity-80 blur-[2px]"
+          style={{ y, opacity: glow }}
+          className="pointer-events-none absolute inset-x-0 top-0 mx-auto aspect-square w-[45vw] max-w-sm rounded-full bg-linear-to-b from-glow to-ember blur-[2px]"
         />
         <p className="relative select-none text-center font-serif text-[28vw] leading-none tracking-tighter text-cream/10 lg:text-[18rem]">
           Senja.
@@ -164,7 +171,7 @@ export default function Footer() {
 
       {/* Bottom bar */}
       <div className="relative border-t border-cream/10 bg-midnight">
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-4 py-6 text-xs text-cream/40 sm:flex-row">
+        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-4 py-6 text-center text-xs text-cream/40 sm:flex-row sm:text-left">
           <p>© 2026 Senja Coffee. All rights reserved.</p>
           <p className="font-serif italic">Senja pergi, kopi menanti.</p>
           <div className="flex gap-4">
