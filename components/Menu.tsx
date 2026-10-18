@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { supabase } from "@/lib/supabase";
 import type { Branch, Category, CartLine, MenuItem, OrderType } from "@/lib/types";
 import CartDrawer from "./CartDrawer";
@@ -47,6 +48,12 @@ export default function Menu() {
     })();
   }, []);
 
+  // Tinggi menu berubah → kira semula posisi animasi scroll bawah dia
+  useEffect(() => {
+    const id = setTimeout(() => ScrollTrigger.refresh(), 300);
+    return () => clearTimeout(id);
+  }, [loading, category]);
+
   const visible = useMemo(
     () => (category === "all" ? items : items.filter((i) => i.category === category)),
     [items, category]
@@ -69,9 +76,9 @@ export default function Menu() {
   return (
     <section id="menu" className="bg-cream text-rust">
       {/* Sunrise band */}
-      <div className="h-48 bg-linear-to-b from-midnight to-cream" />
+      <div className="h-32 bg-linear-to-b from-midnight to-cream md:h-48" />
 
-      <div className="mx-auto max-w-6xl px-4 pb-32">
+      <div className="mx-auto max-w-6xl px-4 pb-24 md:pb-32">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -80,17 +87,17 @@ export default function Menu() {
           className="text-center"
         >
           <p className="text-xs uppercase tracking-[0.4em] text-ember">The Menu</p>
-          <h2 className="mt-4 font-serif text-5xl md:text-7xl">Something for every hour.</h2>
+          <h2 className="mt-4 font-serif text-4xl sm:text-5xl md:text-7xl">Something for every hour.</h2>
         </motion.div>
 
         {/* Branch + mode */}
-        <div className="mt-12 flex flex-col items-center gap-4 md:flex-row md:justify-center">
-          <label className="flex items-center gap-3 rounded-full border border-rust/20 px-5 py-2.5">
-            <span className="text-[10px] uppercase tracking-[0.2em] text-rust/60">Branch</span>
+        <div className="mt-10 flex flex-col items-center gap-4 md:mt-12 md:flex-row md:justify-center">
+          <label className="flex w-full max-w-xs items-center gap-3 rounded-full border border-rust/20 px-5 py-2.5 md:w-auto md:max-w-none">
+            <span className="shrink-0 text-[10px] uppercase tracking-[0.2em] text-rust/60">Branch</span>
             <select
               value={branchId}
               onChange={(e) => setBranchId(e.target.value)}
-              className="cursor-pointer bg-transparent text-sm outline-none"
+              className="min-w-0 flex-1 cursor-pointer bg-transparent text-sm outline-none"
             >
               {branches.map((b) => (
                 <option key={b.id} value={b.id}>{b.name}</option>
@@ -124,15 +131,15 @@ export default function Menu() {
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
-              className="mt-4 text-center text-sm text-rust/70"
+              className="mx-auto mt-4 max-w-md text-center text-sm text-rust/70"
             >
               {branch.address} · {branch.opening_hours}
             </motion.p>
           )}
         </AnimatePresence>
 
-        {/* Category tabs */}
-        <div className="mt-12 flex justify-center gap-6 overflow-x-auto md:gap-10">
+        {/* Category tabs: scroll ke tepi kat phone, center kat desktop */}
+        <div className="no-scrollbar mt-10 flex justify-start gap-6 overflow-x-auto pb-1 md:mt-12 md:justify-center md:gap-10">
           {CATEGORIES.map((c) => (
             <button key={c.id} onClick={() => setCategory(c.id)} className="relative shrink-0 pb-2 text-sm">
               <span className={category === c.id ? "text-rust" : "text-rust/50 hover:text-rust"}>{c.label}</span>
@@ -144,7 +151,7 @@ export default function Menu() {
         </div>
 
         {/* Grid */}
-        <motion.div layout className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <motion.div layout className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 md:mt-10 lg:grid-cols-3">
           {loading &&
             Array.from({ length: 6 }).map((_, i) => (
               <div key={i} className="h-80 animate-pulse rounded-3xl bg-sand/50" />
@@ -160,13 +167,14 @@ export default function Menu() {
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.4 }}
                 whileHover={{ y: -6 }}
-                className="group overflow-hidden rounded-3xl bg-white/60 shadow-sm ring-1 ring-rust/10"
+                className="group min-w-0 overflow-hidden rounded-3xl bg-white/60 shadow-sm ring-1 ring-rust/10"
               >
                 <div className={`relative aspect-[4/3] overflow-hidden bg-linear-to-br ${GRADIENT[item.category]}`}>
                   {item.image_url ? (
                     <img
                       src={item.image_url}
                       alt={item.name}
+                      loading="lazy"
                       className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                     />
                   ) : (
@@ -187,7 +195,7 @@ export default function Menu() {
                 </div>
 
                 <div className="flex items-end justify-between gap-4 p-5">
-                  <div>
+                  <div className="min-w-0">
                     <h3 className="font-serif text-xl">{item.name}</h3>
                     <p className="mt-1 text-sm text-rust/70">{item.description}</p>
                     <p className="mt-3 text-sm font-semibold">{fmt(item.price)}</p>
@@ -216,7 +224,7 @@ export default function Menu() {
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
             onClick={() => setCartOpen(true)}
-            className="fixed bottom-6 right-6 z-40 flex items-center gap-3 rounded-full bg-midnight px-6 py-4 text-cream shadow-2xl"
+            className="fixed bottom-4 right-4 z-40 flex items-center gap-3 rounded-full bg-midnight px-5 py-3.5 text-cream shadow-2xl sm:bottom-6 sm:right-6 sm:px-6 sm:py-4"
           >
             <span className="text-sm">View order</span>
             <motion.span

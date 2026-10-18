@@ -2,6 +2,7 @@ import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import Menu from "@/components/Menu";
 import Reservation from "@/components/Reservation";
+import Footer from "@/components/Footer";
 
 export default function Home() {
   return (
@@ -10,6 +11,7 @@ export default function Home() {
       <Hero />
       <Menu />
       <Reservation />
+      <Footer />
     </main>
   );
 }

@@ -20,8 +20,15 @@
 html.lenis, html.lenis body { height: auto; }
 .lenis.lenis-smooth { scroll-behavior: auto !important; }
 
+/* Halang page scroll ke tepi kat phone */
+html, body { overflow-x: clip; }
+
 body {
   background: var(--color-cream);
   color: var(--color-rust);
   font-family: var(--font-sans);
 }
+
+/* Sorok scrollbar untuk strip yang scroll ke tepi */
+.no-scrollbar { scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
