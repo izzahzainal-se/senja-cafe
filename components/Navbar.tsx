@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence, useMotionValueEvent, useScroll } from "framer-motion";
 import SenjaSun from "./SenjaSun";
 
@@ -17,6 +17,7 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
 
   useMotionValueEvent(scrollY, "change", (y) => {
+    if (open) return;
     const vh = window.innerHeight;
     const prev = scrollY.getPrevious() ?? 0;
     // Scroll bawah → sorok, scroll atas → muncul
@@ -25,6 +26,22 @@ export default function Navbar() {
     const menuTop = document.getElementById("menu")?.offsetTop ?? vh * 2.5;
     setMode(y < vh * 0.6 ? "day" : y < menuTop + 120 ? "night" : "solid");
   });
+
+  // Kunci scroll masa menu terbuka + tutup guna Esc / skrin besar
+  useEffect(() => {
+    const root = document.documentElement;
+    root.style.overflow = open ? "hidden" : "";
+
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    const onResize = () => window.innerWidth >= 768 && setOpen(false);
+    window.addEventListener("keydown", onKey);
+    window.addEventListener("resize", onResize);
+    return () => {
+      root.style.overflow = "";
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("resize", onResize);
+    };
+  }, [open]);
 
   const tone = open
     ? "text-cream"
@@ -42,9 +59,9 @@ export default function Navbar() {
       <motion.header
         animate={{ y: hidden && !open ? "-100%" : "0%" }}
         transition={{ duration: 0.35, ease: "easeOut" }}
-        className={`fixed inset-x-0 top-0 z-40 transition-colors duration-500 ${tone}`}
+        className={`fixed inset-x-0 top-0 z-[70] transition-colors duration-500 ${tone}`}
       >
-        <nav className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
+        <nav className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 md:py-4">
           <a href="#top" onClick={() => setOpen(false)} className="flex items-center gap-2">
             <SenjaSun className="w-9" />
             <span className="font-serif text-2xl">Senja.</span>
@@ -62,15 +79,21 @@ export default function Navbar() {
             </a>
           </div>
 
-          {/* Hamburger */}
-          <button onClick={() => setOpen((o) => !o)} aria-label="Toggle menu" className="relative h-10 w-10 md:hidden">
+          {/* Hamburger: kawasan sentuh 48px */}
+          <button
+            type="button"
+            onClick={() => setOpen((o) => !o)}
+            aria-label={open ? "Close menu" : "Open menu"}
+            aria-expanded={open}
+            className="relative -mr-2 h-12 w-12 touch-manipulation md:hidden"
+          >
             <motion.span
               animate={open ? { rotate: 45, y: 0 } : { rotate: 0, y: -4 }}
-              className="absolute left-2 right-2 top-1/2 h-0.5 bg-current"
+              className="pointer-events-none absolute left-3 right-3 top-1/2 h-0.5 bg-current"
             />
             <motion.span
               animate={open ? { rotate: -45, y: 0 } : { rotate: 0, y: 4 }}
-              className="absolute left-2 right-2 top-1/2 h-0.5 bg-current"
+              className="pointer-events-none absolute left-3 right-3 top-1/2 h-0.5 bg-current"
             />
           </button>
         </nav>
@@ -80,11 +103,12 @@ export default function Navbar() {
       <AnimatePresence>
         {open && (
           <motion.div
+            data-lenis-prevent
             initial={{ clipPath: "circle(0% at 100% 0%)" }}
             animate={{ clipPath: "circle(150% at 100% 0%)" }}
             exit={{ clipPath: "circle(0% at 100% 0%)" }}
             transition={{ duration: 0.6, ease: [0.65, 0, 0.35, 1] }}
-            className="fixed inset-0 z-30 flex flex-col items-center justify-center gap-8 bg-midnight text-cream md:hidden"
+            className="fixed inset-0 z-[60] flex flex-col items-center justify-center gap-8 bg-midnight text-cream md:hidden"
           >
             {[...LINKS, { href: "#menu", label: "Order now" }].map((l, i) => (
               <motion.a
